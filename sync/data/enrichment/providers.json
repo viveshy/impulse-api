@@ -1,0 +1,433 @@
+{
+  "openai": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "openai",
+        "installCommand": "pip install openai",
+        "docsUrl": "https://platform.openai.com/docs/libraries"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "openai",
+        "installCommand": "npm install openai",
+        "docsUrl": "https://platform.openai.com/docs/libraries"
+      }
+    ],
+    "apiBase": "https://api.openai.com/v1",
+    "website": "https://openai.com",
+    "authType": "bearer"
+  },
+  "anthropic": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "anthropic",
+        "installCommand": "pip install anthropic",
+        "docsUrl": "https://docs.anthropic.com/en/api/client-sdks"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "@anthropic-ai/sdk",
+        "installCommand": "npm install @anthropic-ai/sdk",
+        "docsUrl": "https://docs.anthropic.com/en/api/client-sdks"
+      }
+    ],
+    "apiBase": "https://api.anthropic.com/v1",
+    "website": "https://anthropic.com",
+    "authType": "api-key"
+  },
+  "gemini": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "google-genai",
+        "installCommand": "pip install google-genai",
+        "docsUrl": "https://ai.google.dev/gemini-api/docs"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "@google/genai",
+        "installCommand": "npm install @google/genai",
+        "docsUrl": "https://ai.google.dev/gemini-api/docs"
+      }
+    ],
+    "apiBase": "https://generativelanguage.googleapis.com/v1beta",
+    "website": "https://ai.google.dev",
+    "authType": "bearer"
+  },
+  "vertex_ai": {
+    "regions": [
+      "us-central1",
+      "us-east4",
+      "us-west1",
+      "europe-west1",
+      "europe-west4",
+      "asia-northeast1",
+      "asia-southeast1"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "google-cloud-aiplatform",
+        "installCommand": "pip install google-cloud-aiplatform",
+        "docsUrl": "https://cloud.google.com/vertex-ai/docs"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "@google-cloud/vertexai",
+        "installCommand": "npm install @google-cloud/vertexai",
+        "docsUrl": "https://cloud.google.com/vertex-ai/docs"
+      }
+    ],
+    "apiBase": "https://{region}-aiplatform.googleapis.com/v1",
+    "website": "https://cloud.google.com/vertex-ai",
+    "authType": "oauth"
+  },
+  "bedrock": {
+    "regions": [
+      "us-east-1",
+      "us-west-2",
+      "eu-central-1",
+      "eu-west-1",
+      "eu-west-3",
+      "ap-northeast-1",
+      "ap-south-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "ca-central-1",
+      "sa-east-1"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "boto3",
+        "installCommand": "pip install boto3",
+        "docsUrl": "https://docs.aws.amazon.com/bedrock/latest/APIReference/"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "@aws-sdk/client-bedrock-runtime",
+        "installCommand": "npm install @aws-sdk/client-bedrock-runtime",
+        "docsUrl": "https://docs.aws.amazon.com/bedrock/latest/APIReference/"
+      }
+    ],
+    "apiBase": "https://bedrock-runtime.{region}.amazonaws.com",
+    "website": "https://aws.amazon.com/bedrock",
+    "authType": "aws-sigv4"
+  },
+  "azure": {
+    "regions": [
+      "eastus",
+      "eastus2",
+      "westus3",
+      "northcentralus",
+      "swedencentral",
+      "westeurope",
+      "northeurope",
+      "uksouth",
+      "francecentral",
+      "japaneast",
+      "australiaeast"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "openai",
+        "installCommand": "pip install openai",
+        "docsUrl": "https://learn.microsoft.com/azure/ai-services/openai/"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "openai",
+        "installCommand": "npm install openai",
+        "docsUrl": "https://learn.microsoft.com/azure/ai-services/openai/"
+      }
+    ],
+    "apiBase": "https://{resource}.openai.azure.com/openai/v1",
+    "website": "https://azure.microsoft.com/products/ai-services/openai-service",
+    "authType": "api-key"
+  },
+  "azure_ai": {
+    "regions": [
+      "eastus",
+      "eastus2",
+      "westus3",
+      "swedencentral",
+      "westeurope",
+      "northeurope",
+      "uksouth",
+      "japaneast"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "azure-ai-inference",
+        "installCommand": "pip install azure-ai-inference",
+        "docsUrl": "https://learn.microsoft.com/azure/ai-studio/"
+      }
+    ],
+    "apiBase": "https://{resource}.services.ai.azure.com/models",
+    "website": "https://azure.microsoft.com/products/ai-foundry",
+    "authType": "api-key"
+  },
+  "mistral": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "mistralai",
+        "installCommand": "pip install mistralai",
+        "docsUrl": "https://docs.mistral.ai/"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "@mistralai/mistralai",
+        "installCommand": "npm install @mistralai/mistralai",
+        "docsUrl": "https://docs.mistral.ai/"
+      }
+    ],
+    "apiBase": "https://api.mistral.ai/v1",
+    "website": "https://mistral.ai",
+    "authType": "bearer"
+  },
+  "cohere": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "cohere",
+        "installCommand": "pip install cohere",
+        "docsUrl": "https://docs.cohere.com/"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "cohere-ai",
+        "installCommand": "npm install cohere-ai",
+        "docsUrl": "https://docs.cohere.com/"
+      }
+    ],
+    "apiBase": "https://api.cohere.com/v2",
+    "website": "https://cohere.com",
+    "authType": "bearer"
+  },
+  "groq": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "groq",
+        "installCommand": "pip install groq",
+        "docsUrl": "https://console.groq.com/docs"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "groq-sdk",
+        "installCommand": "npm install groq-sdk",
+        "docsUrl": "https://console.groq.com/docs"
+      }
+    ],
+    "apiBase": "https://api.groq.com/openai/v1",
+    "website": "https://groq.com",
+    "authType": "bearer"
+  },
+  "together_ai": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "together",
+        "installCommand": "pip install together",
+        "docsUrl": "https://docs.together.ai/"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "together-ai",
+        "installCommand": "npm install together-ai",
+        "docsUrl": "https://docs.together.ai/"
+      }
+    ],
+    "apiBase": "https://api.together.xyz/v1",
+    "website": "https://together.ai",
+    "authType": "bearer"
+  },
+  "fireworks_ai": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "fireworks-ai",
+        "installCommand": "pip install fireworks-ai",
+        "docsUrl": "https://docs.fireworks.ai/"
+      }
+    ],
+    "apiBase": "https://api.fireworks.ai/inference/v1",
+    "website": "https://fireworks.ai",
+    "authType": "bearer"
+  },
+  "deepseek": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "openai",
+        "installCommand": "pip install openai",
+        "docsUrl": "https://api-docs.deepseek.com/"
+      }
+    ],
+    "apiBase": "https://api.deepseek.com/v1",
+    "website": "https://deepseek.com",
+    "authType": "bearer"
+  },
+  "xai": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "xai-sdk",
+        "installCommand": "pip install xai-sdk",
+        "docsUrl": "https://docs.x.ai/"
+      }
+    ],
+    "apiBase": "https://api.x.ai/v1",
+    "website": "https://x.ai",
+    "authType": "bearer"
+  },
+  "cerebras": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "cerebras_cloud_sdk",
+        "installCommand": "pip install cerebras_cloud_sdk",
+        "docsUrl": "https://inference-docs.cerebras.ai/"
+      }
+    ],
+    "apiBase": "https://api.cerebras.ai/v1",
+    "website": "https://cerebras.ai",
+    "authType": "bearer"
+  },
+  "perplexity": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "openai",
+        "installCommand": "pip install openai",
+        "docsUrl": "https://docs.perplexity.ai/"
+      }
+    ],
+    "apiBase": "https://api.perplexity.ai",
+    "website": "https://perplexity.ai",
+    "authType": "bearer"
+  },
+  "replicate": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "replicate",
+        "installCommand": "pip install replicate",
+        "docsUrl": "https://replicate.com/docs"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "replicate",
+        "installCommand": "npm install replicate",
+        "docsUrl": "https://replicate.com/docs"
+      }
+    ],
+    "apiBase": "https://api.replicate.com/v1",
+    "website": "https://replicate.com",
+    "authType": "bearer"
+  },
+  "ollama": {
+    "regions": [
+      "self-hosted"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "ollama",
+        "installCommand": "pip install ollama",
+        "docsUrl": "https://github.com/ollama/ollama"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "ollama",
+        "installCommand": "npm install ollama",
+        "docsUrl": "https://github.com/ollama/ollama"
+      }
+    ],
+    "apiBase": "http://localhost:11434/v1",
+    "website": "https://ollama.com",
+    "authType": "bearer"
+  },
+  "huggingface": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "huggingface_hub",
+        "installCommand": "pip install huggingface_hub",
+        "docsUrl": "https://huggingface.co/docs/inference-providers"
+      }
+    ],
+    "apiBase": "https://router.huggingface.co/v1",
+    "website": "https://huggingface.co",
+    "authType": "bearer"
+  },
+  "openrouter": {
+    "regions": [
+      "global"
+    ],
+    "sdks": [
+      {
+        "language": "Python",
+        "packageName": "openai",
+        "installCommand": "pip install openai",
+        "docsUrl": "https://openrouter.ai/docs"
+      },
+      {
+        "language": "TypeScript",
+        "packageName": "openai",
+        "installCommand": "npm install openai",
+        "docsUrl": "https://openrouter.ai/docs"
+      }
+    ],
+    "apiBase": "https://openrouter.ai/api/v1",
+    "website": "https://openrouter.ai",
+    "authType": "bearer"
+  }
+}
