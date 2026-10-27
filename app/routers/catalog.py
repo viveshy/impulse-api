@@ -1,6 +1,7 @@
 """Internal bulk endpoint. The frontend loads the whole catalog in one request; public
 clients still use the paginated /v1/models and /v1/providers (this 404s for them)."""
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from app.dao import meta as meta_dao
 from app.db import get_db
@@ -14,4 +15,6 @@ router = APIRouter(tags=["catalog"])
 def catalog(request: Request, conn=Depends(get_db)):
     if not is_internal(client_ip(request)):
         raise HTTPException(status_code=404, detail="not_found")
-    return {**handler.full_catalog(conn), "meta": meta_dao.all_meta(conn)}
+    # The payload is already plain JSON types; returning the response directly skips
+    # FastAPI's per-value jsonable_encoder pass, which costs more than building it.
+    return JSONResponse({**handler.full_catalog(conn), "meta": meta_dao.all_meta(conn)})

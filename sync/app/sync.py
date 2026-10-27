@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 import httpx
 
 from app import mapping
-from app.db import connect, init_schema, wipe_catalog
+from app.db import connect, init_schema, prune_price_history, wipe_catalog
 from app.enrichment import Enrichment
 from app.settings import settings
 from app.sources import huggingface, leaderboards, openrouter
@@ -263,8 +263,7 @@ def run_sync() -> dict:
             conn.executemany(
                 "INSERT INTO model_price_history (model_id,input_per_mtok,output_per_mtok,cached_input_per_mtok,recorded_at) "
                 "VALUES (?,?,?,?,?)", hist)
-            cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
-            conn.execute("DELETE FROM model_price_history WHERE recorded_at < ?", (cutoff,))
+            prune_price_history(conn, (datetime.now(timezone.utc) - timedelta(days=30)).isoformat())
 
             enriched = sum(1 for m in model_rows if m["enriched"])
             for k, v in {"generated_at": now, "litellm_ref": settings.LITELLM_REF,

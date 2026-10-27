@@ -5,6 +5,9 @@ from fastapi import Query
 
 from app.settings import settings
 
+# Far past any real catalog, and keeps (page - 1) * limit inside SQLite's 64-bit OFFSET.
+PAGE_LAST = 1_000_000
+
 
 @dataclass
 class Page:
@@ -17,7 +20,7 @@ class Page:
 
 
 def page_params(
-    page: int = Query(1, ge=1, description="1-based page number"),
+    page: int = Query(1, ge=1, le=PAGE_LAST, description="1-based page number"),
     limit: int = Query(settings.PAGE_DEFAULT, ge=1, le=settings.PAGE_MAX,
                        description=f"items per page (max {settings.PAGE_MAX})"),
 ) -> Page:

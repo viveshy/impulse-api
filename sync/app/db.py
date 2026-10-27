@@ -25,3 +25,17 @@ def wipe_catalog(conn: sqlite3.Connection) -> None:
     conn.execute("DELETE FROM models")     # cascades all model_* children
     conn.execute("DELETE FROM providers")  # cascades all provider_* children
     conn.execute("DELETE FROM meta")
+
+
+def prune_price_history(conn: sqlite3.Connection, cutoff: str) -> None:
+    """
+    Drop price history older than `cutoff`, except each model's newest row before it: the
+    price in effect when the window opens. A later move is measured against that row, and
+    without it a model whose price has been stable gets logged again as if it were new.
+    """
+    conn.execute(
+        "DELETE FROM model_price_history WHERE recorded_at < :cutoff AND id NOT IN ("
+        " SELECT id FROM (SELECT id, ROW_NUMBER() OVER ("
+        "   PARTITION BY model_id ORDER BY recorded_at DESC) AS rn"
+        "  FROM model_price_history WHERE recorded_at < :cutoff) WHERE rn = 1)",
+        {"cutoff": cutoff})

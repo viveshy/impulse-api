@@ -168,7 +168,8 @@ CREATE INDEX IF NOT EXISTS idx_model_benchmarks_model ON model_benchmarks(model_
 -- ========================= HISTORY ===========================================
 -- Append-only price log. NOT wiped on rebuild (persists) and intentionally NOT
 -- FK'd to models, so it survives a model vanishing upstream. A row is written
--- only when a model's price CHANGES; rows older than 30 days are pruned.
+-- only when a model's price CHANGES; rows older than 30 days are pruned, except
+-- each model's newest one, the baseline its next change is compared against.
 CREATE TABLE IF NOT EXISTS model_price_history (
   id                    INTEGER PRIMARY KEY,
   model_id              TEXT NOT NULL,

@@ -3,9 +3,15 @@
 The DTOs never expose the internal slug id - the `guid` is the only identifier a client
 ever sees or sends.
 """
+import json
+from datetime import datetime, timedelta, timezone
+
 from fastapi import HTTPException
 
 from app.dao import models as dao
+from app.utils.listing import route_of, spec_extras
+
+_PRICE_CHANGES_MAX = 200
 
 # Truly-open licenses (redistribute + modify + commercial). Restricted community licenses
 # (Llama, Gemma, DeepSeek, Qwen custom, CC-BY-NC, RAIL) are open-*weight* but not open-*source*.
@@ -26,7 +32,17 @@ def _split(v: str | None) -> list[str]:
     return v.split(",") if v else []
 
 
-def _summary(row) -> dict:
+def _spec(row) -> dict:
+    """The verbatim LiteLLM entry ({} when missing or unreadable)."""
+    try:
+        spec = json.loads(row["model_spec"] or "{}")
+    except ValueError:
+        return {}
+    return spec if isinstance(spec, dict) else {}
+
+
+def _summary(row, spec: dict | None = None) -> dict:
+    x = spec_extras(_spec(row) if spec is None else spec)
     return {
         "guid": row["guid"],
         "name": row["name"],
@@ -34,8 +50,13 @@ def _summary(row) -> dict:
         "mode": row["mode"],
         "status": row["status"],
         "provider": {"guid": row["provider_guid"], "name": row["provider_name"]},
+        "route": route_of(row["internal_id"], row["name"], row["provider_slug"],
+                          row["litellm_provider"]),
+        "litellmProvider": row["litellm_provider"],
         "description": row["description"],
         "releaseDate": row["release_date"],
+        "deprecationDate": x["deprecationDate"],
+        "sourceUrl": x["sourceUrl"],
         "popularity": row["popularity"],
         "isOpenWeights": bool(row["is_open_weights"]),
         "openTag": open_tag(row),
@@ -47,12 +68,16 @@ def _summary(row) -> dict:
         "contextWindow": row["context_window"],
         "maxOutputTokens": row["max_output_tokens"],
         "capabilities": _split(row["cap_keys"]),
+        "features": x["features"],
+        "reasoningEfforts": x["reasoningEfforts"],
+        "rateLimits": x["rateLimits"],
         "modalities": {"input": _split(row["in_mods"]), "output": _split(row["out_mods"])},
         "tags": _split(row["tag_names"]),
         "pricing": {
             "inputPerMtok": row["input_per_mtok"],
             "outputPerMtok": row["output_per_mtok"],
             "cachedInputPerMtok": row["cached_input_per_mtok"],
+            **x["pricing"],
         },
         "performance": {
             "ttftMs": row["ttft_ms"],
@@ -71,11 +96,12 @@ def get_model(conn, guid: str) -> dict:
     row = dao.get_by_guid(conn, guid)
     if row is None:
         raise HTTPException(404, detail=f"No model with guid {guid}")
-    mid = dao.internal_id(conn, guid)
-    dto = _summary(row)  # already carries capabilities, modalities, tags, runtimes
-    dto["litellmProvider"] = row["litellm_provider"]
+    mid = row["internal_id"]
+    spec = _spec(row)
+    dto = _summary(row, spec)  # already carries capabilities, modalities, tags, runtimes
     dto["benchmarks"] = dao.benchmarks(conn, mid)
     dto["endpoints"] = dao.endpoints(conn, mid)
+    dto["spec"] = spec
     return dto
 
 
@@ -102,3 +128,18 @@ def get_price_history(conn, guid: str) -> dict:
     if mid is None:
         raise HTTPException(404, detail=f"No model with guid {guid}")
     return {"guid": guid, "history": dao.price_history(conn, mid)}
+
+
+def price_changes(conn, days: int) -> dict:
+    # same ISO format the sync writes `recorded_at` in, so the window compares as text
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="microseconds")
+    rows = dao.price_changes(conn, since=since, limit=_PRICE_CHANGES_MAX)
+    return {"days": days, "changes": [{
+        "guid": r["guid"],
+        "name": r["name"],
+        "provider": {"guid": r["provider_guid"], "name": r["provider_name"]},
+        "route": route_of(r["internal_id"], r["name"], r["provider_slug"], r["litellm_provider"]),
+        "from": {"inputPerMtok": r["prev_input"], "outputPerMtok": r["prev_output"]},
+        "to": {"inputPerMtok": r["input_per_mtok"], "outputPerMtok": r["output_per_mtok"]},
+        "at": r["recorded_at"],
+    } for r in rows]}

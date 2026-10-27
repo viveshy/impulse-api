@@ -10,8 +10,9 @@ impulse-api/
   sync/    the catalog sync - builds/refreshes the SQLite database from open sources
 ```
 
-Impulse's focus is **open-weight models and their alternatives**, built entirely on open,
-free data (no paid providers). Gaps are left honest, never fabricated.
+Impulse's focus is **frontier models first** - what shipped, what it costs, where to run it
+and what's cheaper - with open-weight models alongside, built entirely on open, free data
+(no paid providers). Gaps are left honest, never fabricated.
 
 ## Quick start
 
@@ -58,21 +59,44 @@ Deterministic UUIDv5 GUIDs, a 30-day price-history log, open-weight/self-host da
 
 ## The API (`app/`)
 
-Structure: `router → handler → dao → utils`. Read-only connection (`mode=ro`), camelCase
-DTOs, fixed-window rate limit. Config (env): `IMPULSE_DB_PATH` (defaults to
-`sync/impulse.db`), `PORT`, `HOST`, `RELOAD`, `PAGE_DEFAULT`/`PAGE_MAX`,
-`RATE_LIMIT`/`RATE_WINDOW`, `CORS_ORIGINS`.
+Structure: `router → handler → dao → utils`. Read-only catalog connection (`mode=ro`),
+camelCase DTOs, fixed-window rate limit. The only writes go to a separate visitor-analytics
+SQLite file. Config (env): `IMPULSE_DB_PATH` (defaults to `sync/impulse.db`),
+`IMPULSE_ANALYTICS_DB` (defaults to `./analytics.db`; must be writable),
+`IMPULSE_SITE_HOST` (own host, left out of referrers; defaults to `impulse.viveshy.com`),
+`PORT`, `HOST`, `RELOAD`, `PAGE_DEFAULT`/`PAGE_MAX`, `RATE_LIMIT`/`RATE_WINDOW`,
+`CORS_ORIGINS`.
 
 | Method · Path | Purpose |
 |---|---|
 | `GET /health` | liveness |
 | `GET /v1/meta` | catalog freshness + counts |
 | `GET /v1/models` | paginated list - `q, mode, open_weights, capability, provider, max_price, sort` |
-| `GET /v1/models/{guid}` | full model detail (caps, modalities, tags, runtimes, benchmarks, endpoints) |
+| `GET /v1/models/{guid}` | full model detail (caps, modalities, tags, runtimes, benchmarks, endpoints) plus the verbatim LiteLLM `spec` |
 | `GET /v1/models/{guid}/alternatives` | **two-tier** - open-weight first (tagged), then cheaper (any license) |
 | `GET /v1/models/{guid}/price-history` | 30-day price log |
 | `GET /v1/providers` | paginated list - `category, q` |
 | `GET /v1/providers/{guid}` | provider detail (regions, endpoints, SDKs) |
+
+Every model DTO also carries the listing's `route` (region, deployment or vendor org from
+its LiteLLM key), `litellmProvider`, `deprecationDate`, `sourceUrl`, `features`,
+`reasoningEfforts`, `rateLimits`, and pricing tiers parsed from the spec: cache writes
+(5 min / 1 h), batch, flex, priority, `longContext`, `webSearchPerQuery`, `regionalUplift`.
+
+Frontend-only routes (loopback / private-network clients; **404** for everyone else):
+
+| Method · Path | Purpose |
+|---|---|
+| `GET /v1/catalog` | every model + provider in one payload |
+| `GET /v1/price-changes?days=30` | list-price moves on active models, newest first (1-90 days, max 200) |
+| `POST /v1/analytics/hit` | `{path, ip, ua, ref}` → `{"counted": bool}`; bots, `/api/` and `/_next/` paths are skipped |
+| `GET /v1/analytics/summary?days=30` | views, visitors, daily series, top pages and referrers (1-365 days) |
+
+Visitor analytics use no cookies and store no IPs: a visitor is
+`sha256(daily salt + ip + user agent)[:16]`, and only today's salt is kept, so visits can't
+be linked across days. Hits older than 400 days are pruned.
+
+Tests: `uv run pytest -q` (builds throwaway catalog and analytics DBs; never touches a real one).
 
 ### Alternatives - the flagship
 
@@ -84,7 +108,8 @@ DTOs, fixed-window rate limit. Config (env): `IMPULSE_DB_PATH` (defaults to
 
 Run the sync on a timer to refresh `sync/impulse.db`; serve `app` with uvicorn behind a
 reverse proxy. The API opens the DB read-only, so serving while re-syncing is safe (the
-sync rebuilds in a single transaction).
+sync rebuilds in a single transaction). Point `IMPULSE_ANALYTICS_DB` at a writable state
+directory (e.g. `/var/lib/impulse/analytics.db`).
 
 ## Contributing
 

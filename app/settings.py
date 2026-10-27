@@ -2,13 +2,20 @@
 import os
 from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parents[1]
+
 # By default read the DB the bundled sync job produces (in ./sync/).
-_DEFAULT_DB = Path(__file__).resolve().parents[1] / "sync" / "impulse.db"
+_DEFAULT_DB = _ROOT / "sync" / "impulse.db"
 
 
 class Settings:
     def __init__(self) -> None:
         self.DB_PATH = os.getenv("IMPULSE_DB_PATH", str(_DEFAULT_DB))
+
+        # Visitor analytics get their own writable file; the catalog stays read-only.
+        self.ANALYTICS_DB = os.getenv("IMPULSE_ANALYTICS_DB", str(_ROOT / "analytics.db"))
+        # Referrers from the site itself aren't traffic sources.
+        self.SITE_HOST = os.getenv("IMPULSE_SITE_HOST", "impulse.viveshy.com")
 
         # Pagination (the catalog is only reachable page-by-page - no bulk dump).
         self.PAGE_DEFAULT = int(os.getenv("PAGE_DEFAULT", "30"))

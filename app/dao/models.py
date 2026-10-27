@@ -3,10 +3,12 @@ import sqlite3
 
 Row = sqlite3.Row
 
-# One canonical projection: base facts + 1:1 enrichment + license, with a blended price.
-# `p.id`/`m.id` (internal slugs) are selected only for internal joins, never serialized.
+# One canonical projection: base facts + 1:1 enrichment + license + the verbatim LiteLLM
+# spec, with a blended price. `m.id`/`p.id` (internal slugs) are selected only to derive
+# the listing's route, never serialized.
 _SUMMARY = """
 SELECT m.guid, m.name, m.family, m.mode, m.status, m.litellm_provider,
+       m.id AS internal_id, p.id AS provider_slug, rw.model_spec,
        p.guid AS provider_guid, p.name AS provider_name,
        m.input_per_mtok, m.output_per_mtok, m.cached_input_per_mtok,
        m.context_window, m.max_output_tokens,
@@ -23,6 +25,7 @@ FROM models m
 JOIN providers p ON p.id = m.provider_id
 LEFT JOIN model_enrichment e ON e.model_id = m.id
 LEFT JOIN licenses l ON l.id = e.license_id
+LEFT JOIN model_raw rw ON rw.model_id = m.id
 WHERE m.is_active = 1
 """
 
@@ -109,6 +112,32 @@ def endpoints(conn, mid): return [dict(r) for r in conn.execute(
 def price_history(conn, mid): return [dict(r) for r in conn.execute(
     "SELECT input_per_mtok, output_per_mtok, cached_input_per_mtok, recorded_at "
     "FROM model_price_history WHERE model_id = ? ORDER BY recorded_at", [mid])]
+
+
+def price_changes(conn, *, since: str, limit: int = 200) -> list[Row]:
+    """List-price moves recorded at or after `since`, newest first: a history row whose
+    previous row for the same model, however old, has a different input or output price. A
+    model's first row is just its first sighting, and cached-only moves don't count. The log
+    outlives models that leave the catalog, so only active models are joined in."""
+    return conn.execute("""
+        WITH h AS (
+          SELECT model_id, input_per_mtok, output_per_mtok, recorded_at,
+                 LAG(input_per_mtok)  OVER w AS prev_input,
+                 LAG(output_per_mtok) OVER w AS prev_output,
+                 LAG(recorded_at)     OVER w AS prev_at
+          FROM model_price_history
+          WINDOW w AS (PARTITION BY model_id ORDER BY recorded_at)
+        )
+        SELECT m.guid, m.name, m.id AS internal_id, m.litellm_provider,
+               p.guid AS provider_guid, p.name AS provider_name, p.id AS provider_slug,
+               h.prev_input, h.prev_output, h.input_per_mtok, h.output_per_mtok, h.recorded_at
+        FROM h
+        JOIN models m ON m.id = h.model_id AND m.is_active = 1
+        JOIN providers p ON p.id = m.provider_id
+        WHERE h.recorded_at >= ? AND h.prev_at IS NOT NULL
+          AND (h.input_per_mtok IS NOT h.prev_input OR h.output_per_mtok IS NOT h.prev_output)
+        ORDER BY h.recorded_at DESC, m.name
+        LIMIT ?""", [since, limit]).fetchall()
 
 
 def alternatives(conn, target: Row, *, limit=8) -> tuple[list[Row], list[Row]]:

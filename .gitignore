@@ -10,5 +10,8 @@ __pycache__/
 *.db-wal
 *.sqlite
 
+# visitor analytics (IMPULSE_ANALYTICS_DB defaults to ./analytics.db)
+analytics.db*
+
 # env
 .env
